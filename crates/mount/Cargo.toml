@@ -1,0 +1,15 @@
+[package]
+name = "blackhole-mount"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+blackhole-core = { version = "0.1.0", path = "../core" }
+bytes = "1.12.1"
+clap = { version = "4.6.7", features = ["derive", "env"] }
+nfsserve = "0.11.0"
+time = { version = "0.3.55", features = ["parsing"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "signal", "process", "sync", "time"] }

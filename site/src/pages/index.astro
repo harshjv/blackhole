@@ -1,0 +1,96 @@
+---
+import { Database, FolderOpen, Moon, Undo2, Zap } from '@lucide/astro'
+import codexSvg from '@lobehub/icons-static-svg/icons/codex.svg?raw'
+import { siClaude, siCursor, siGithub, siModelcontextprotocol } from 'simple-icons'
+import BrandIcon from '../components/BrandIcon.astro'
+import Door from '../components/Door.astro'
+import FsDemo from '../components/FsDemo.astro'
+import '../styles/global.css'
+
+const email = 'harsh@useblackhole.com'
+const repo = 'https://github.com/harshjv/blackhole'
+const title = 'Blackhole'
+const description = 'A filesystem for AI agents. Every write has a name on it, and one command undoes one agent.'
+
+const users = [
+  { name: 'Fractal', href: 'https://fractal.ai', logo: '/logo-fractal.png', height: 'h-6' },
+  { name: 'Analytics Vidhya', href: 'https://www.analyticsvidhya.com', logo: '/logo-analytics-vidhya.png', height: 'h-8' },
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content="Let your agents work all night. Take back the one that breaks things." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.site} />
+    <meta name="theme-color" content="#14111c" />
+  </head>
+  <body>
+    <main class="mx-auto flex min-h-dvh max-w-6xl flex-col items-center gap-16 px-4 py-12 text-center text-sm sm:px-6 sm:py-16">
+      <header class="flex w-full items-center justify-between">
+        <span class="font-semibold text-accent">blackhole</span>
+        <a href={repo} class="inline-flex items-center gap-2 rounded-full border border-edge px-3 py-1 text-muted transition-colors hover:border-paper hover:text-paper">
+          <BrandIcon icon={siGithub} />
+          GitHub
+        </a>
+      </header>
+
+      <section class="flex w-full flex-col items-center gap-6">
+        <h1 class="flex flex-col items-center gap-2 text-[1.75rem] leading-tight font-semibold tracking-tight text-paper sm:text-4xl lg:text-[2.75rem]">
+          <span class="flex flex-wrap items-center justify-center gap-x-[0.6em] gap-y-1 font-normal text-muted">
+            <span class="whitespace-nowrap">Let your agents</span>
+            <span class="whitespace-nowrap">work all</span>
+            <span class="inline-flex items-center gap-[0.35em] whitespace-nowrap">night <span class="hero-icon text-[#fde68a]"><Moon class="icon-moon" /></span></span>
+          </span>
+          <span class="flex flex-wrap items-center justify-center gap-x-[0.6em] gap-y-1">
+            <span class="inline-flex items-center gap-[0.35em] whitespace-nowrap">Take back <span class="hero-icon text-accent"><Undo2 class="icon-undo" /></span></span>
+            <span class="whitespace-nowrap">the one that</span>
+            <span class="inline-flex items-center gap-[0.35em] whitespace-nowrap">breaks things <span class="hero-icon text-[#ff4d4d]"><Zap class="icon-break" /></span></span>
+          </span>
+        </h1>
+        <p class="max-w-xl text-base leading-relaxed text-muted">
+          A filesystem where every write has a name on it, and one command undoes one agent.
+        </p>
+      </section>
+
+      <section class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+        <h2 class="w-full text-dim sm:w-auto">used by</h2>
+        {
+          users.map((user) => (
+            <a href={user.href} target="_blank" rel="noopener noreferrer" class="opacity-70 transition-opacity hover:opacity-100">
+              <img src={user.logo} alt={user.name} class:list={[user.height, 'w-auto']} />
+            </a>
+          ))
+        }
+      </section>
+
+      <section class="w-full" aria-label="How agents use a filesystem compared with a person">
+        <FsDemo />
+      </section>
+
+      <section class="flex w-full max-w-xl flex-col gap-3">
+        <h2 class="text-dim">plug it in</h2>
+        <ul class="rounded-2xl border border-edge bg-well px-5 text-left">
+          <Door label="Add to Claude Code" command="claude mcp add blackhole -- blackhole-mcp"><BrandIcon icon={siClaude} /></Door>
+          <Door label="Add to Codex" command="codex mcp add blackhole -- blackhole-mcp"><span class="flex size-4 [&>svg]:size-4" set:html={codexSvg} /></Door>
+          <Door label="Add to Cursor" command='{ "blackhole": { "command": "blackhole-mcp" } }'><BrandIcon icon={siCursor} /></Door>
+          <Door label="Any MCP client" command="https://<your-server>/mcp"><BrandIcon icon={siModelcontextprotocol} /></Door>
+          <Door label="Use as S3" command="aws s3 ls --endpoint-url https://<your-server>"><Database class="size-4" /></Door>
+          <Door label="Open in Finder" command="blackhole-mount corpus ~/corpus"><FolderOpen class="size-4" /></Door>
+        </ul>
+      </section>
+
+      <footer class="mt-auto flex w-full flex-wrap items-center justify-between gap-4 text-dim">
+        <a href={`mailto:${email}`} class="text-paper underline decoration-edge underline-offset-4 hover:decoration-accent">{email}</a>
+        <span>open source · 2026</span>
+      </footer>
+    </main>
+  </body>
+</html>

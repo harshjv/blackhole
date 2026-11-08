@@ -1,0 +1,26 @@
+[package]
+name = "blackhole-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+bytes = "1.12.1"
+fastcdc = "5.0.0"
+futures = "0.3.34"
+hex = "0.4.3"
+object_store = { version = "0.14.2", features = ["aws"] }
+quick_cache = "0.7.0"
+rayon = "1.12.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "sqlite", "time"] }
+thiserror = "2.0.21"
+time = "0.3.55"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "sync"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }

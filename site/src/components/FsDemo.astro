@@ -1,0 +1,211 @@
+---
+const agents = [
+  { id: 'a1', color: '#ffb86b' },
+  { id: 'a2', color: '#7dd3fc' },
+  { id: 'a3', color: '#a78bfa' },
+  { id: 'a4', color: '#86efac' },
+  { id: 'a5', color: '#f9a8d4' },
+  { id: 'a6', color: '#fde68a' },
+]
+
+const files = Array.from({ length: 12 }, (_, i) => `${String(i + 1).padStart(4, '0')}.jsonl`)
+---
+
+<div data-fs-demo class="grid grid-cols-1 gap-4 text-left text-xs lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+  <section class="flex flex-col rounded-2xl border border-edge bg-well p-5">
+    <header class="mb-1 flex h-5 items-center justify-between">
+      <span class="text-sm text-paper">you</span>
+    </header>
+    <p class="mb-4 h-4 truncate text-dim">1 writer · 1 file · saves when ready</p>
+    <div class="flex flex-1 flex-col rounded-lg border border-edge bg-ink p-4">
+      <div class="mb-3 flex h-4 items-center justify-between text-dim">
+        <span>notes.md</span>
+        <span data-human-status class="w-24 text-right whitespace-nowrap">editing</span>
+      </div>
+      <pre data-human-text class="h-[4.5rem] overflow-hidden whitespace-pre text-muted"></pre>
+    </div>
+    <ol data-human-log class="mt-4 flex h-[5.75rem] flex-col justify-end gap-1 overflow-hidden border-t border-edge pt-3 text-dim">
+      <li class="truncate whitespace-nowrap">you saved notes.md · v2</li>
+    </ol>
+  </section>
+
+  <section class="rounded-2xl border border-edge bg-well p-5">
+    <header class="mb-1 flex h-5 items-center justify-between gap-4">
+      <span class="shrink-0 text-sm text-paper">your agents</span>
+      <span data-status class="min-w-0 flex-1 truncate text-right whitespace-nowrap text-dim">all writing</span>
+    </header>
+    <p class="mb-4 h-4 truncate text-dim">6 writers · 1 corpus · never stop</p>
+
+    <ul class="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+      {
+        agents.map((agent) => (
+          <li
+            data-agent={agent.id}
+            data-color={agent.color}
+            class="flex h-7 items-center justify-center gap-1.5 rounded-full border border-edge text-muted transition-colors"
+          >
+            <span class="size-2 shrink-0 rounded-full" style={`background:${agent.color}`} />
+            <span>{agent.id}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <ol class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+      {
+        files.map((file) => (
+          <li
+            data-file={file}
+            class="flex h-14 flex-col justify-center gap-1 rounded-lg border border-edge bg-ink px-2.5 transition-[border-color,background-color] duration-300"
+          >
+            <span class="truncate whitespace-nowrap text-muted">{file}</span>
+            <span data-file-meta class="truncate whitespace-nowrap text-dim">v1 · seed</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <ol data-log class="mt-4 flex h-[5.75rem] flex-col justify-end gap-1 overflow-hidden border-t border-edge pt-3 text-dim"></ol>
+  </section>
+</div>
+
+<script>
+  type FileState = { el: HTMLElement; meta: HTMLElement; v: number; by: string; broken: boolean; prev: string }
+
+  const root = document.querySelector<HTMLElement>('[data-fs-demo]')
+
+  if (root) {
+    const RED = '#ff4d4d'
+    const PAPER = '#fff7ec'
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const humanText = root.querySelector<HTMLElement>('[data-human-text]')!
+    const humanStatus = root.querySelector<HTMLElement>('[data-human-status]')!
+    const status = root.querySelector<HTMLElement>('[data-status]')!
+    const log = root.querySelector<HTMLElement>('[data-log]')!
+    const humanLog = root.querySelector<HTMLElement>('[data-human-log]')!
+    const agentEls = new Map([...root.querySelectorAll<HTMLElement>('[data-agent]')].map((el) => [el.dataset.agent!, el]))
+    const colors = new Map([...agentEls].map(([id, el]) => [id, el.dataset.color!]))
+    const files: FileState[] = [...root.querySelectorAll<HTMLElement>('[data-file]')].map((el) => ({
+      el,
+      meta: el.querySelector<HTMLElement>('[data-file-meta]')!,
+      v: 1,
+      by: 'seed',
+      broken: false,
+      prev: 'seed',
+    }))
+
+    const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)]
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+    const tag = (id: string) => `<span style="color:${colors.get(id) ?? PAPER}">${id}</span>`
+
+    const show = (file: FileState, text: string, color: string) => {
+      file.meta.textContent = text
+      file.meta.style.color = color
+      file.el.style.borderColor = color
+      file.el.style.backgroundColor = file.broken ? 'rgba(255,77,77,0.08)' : ''
+      setTimeout(() => {
+        if (!file.broken) file.el.style.borderColor = ''
+      }, 500)
+    }
+
+    const append = (list: HTMLElement, html: string) => {
+      const line = document.createElement('li')
+      line.className = 'truncate whitespace-nowrap'
+      line.innerHTML = html
+      list.append(line)
+      while (list.children.length > 4) list.firstElementChild?.remove()
+    }
+
+    const addLog = (html: string) => append(log, html)
+
+    const setStatus = (text: string, color = '') => {
+      status.textContent = text
+      status.style.color = color
+    }
+
+    const write = (agent: string, broken: boolean) => {
+      const file = pick(files)
+      if (file.broken && !broken) return
+      if (broken && !file.broken) file.prev = file.by
+      file.v += 1
+      file.by = agent
+      file.broken = broken
+      show(file, broken ? `v${file.v} · ${agent} ✕` : `v${file.v} · ${agent}`, broken ? RED : colors.get(agent)!)
+      const name = file.el.dataset.file
+      addLog(broken ? `${tag(agent)} <span style="color:${RED}">trashed ${name}</span>` : `${tag(agent)} wrote ${name}`)
+    }
+
+    const setRogue = (id: string, rogue: boolean) => {
+      const el = agentEls.get(id)!
+      el.style.borderColor = rogue ? RED : ''
+      el.style.color = rogue ? RED : ''
+    }
+
+    const typeHuman = async () => {
+      const text = '# launch plan\n- finish the site\n- send the deck'
+      let version = 2
+      for (;;) {
+        humanText.textContent = ''
+        humanStatus.textContent = 'editing'
+        humanStatus.style.color = ''
+        for (const char of text) {
+          humanText.textContent += char
+          await sleep(char === '\n' ? 400 : 85)
+        }
+        await sleep(900)
+        version += 1
+        humanStatus.textContent = `saved · v${version}`
+        humanStatus.style.color = PAPER
+        append(humanLog, `<span style="color:${PAPER}">you</span> saved notes.md · v${version}`)
+        await sleep(3200)
+      }
+    }
+
+    const runAgents = async () => {
+      const rogue = 'a4'
+      const ids = [...agentEls.keys()]
+      const healthy = ids.filter((id) => id !== rogue)
+      for (;;) {
+        setStatus('all writing')
+        for (let i = 0; i < 22; i += 1) {
+          write(pick(ids), false)
+          await sleep(260)
+        }
+        setRogue(rogue, true)
+        setStatus(`${rogue} went rogue`, RED)
+        for (let i = 0; i < 16; i += 1) {
+          write(i % 2 === 0 ? rogue : pick(healthy), i % 2 === 0)
+          await sleep(200)
+        }
+        await sleep(600)
+        setStatus(`undoing ${rogue}`, PAPER)
+        addLog(`<span style="color:${PAPER}">$ blackhole undo --by ${rogue}</span>`)
+        await sleep(700)
+        const broken = files.filter((file) => file.broken)
+        for (const file of broken) {
+          file.v += 1
+          file.by = file.prev
+          file.broken = false
+          show(file, `v${file.v} · restored`, PAPER)
+          await sleep(140)
+        }
+        addLog(`${tag('undo')} restored ${broken.length} files · rest kept`)
+        setRogue(rogue, false)
+        setStatus(`${rogue} undone · others kept`, PAPER)
+        await sleep(2600)
+      }
+    }
+
+    if (reduced) {
+      humanText.textContent = '# launch plan\n- finish the site\n- send the deck'
+      humanStatus.textContent = 'saved · v3'
+      setStatus('a4 undone · others kept', PAPER)
+      addLog(`${tag('a4')} <span style="color:${RED}">trashed 7 files</span>`)
+      addLog(`<span style="color:${PAPER}">$ blackhole undo --by a4</span>`)
+      addLog(`${tag('undo')} restored 7 files · rest kept`)
+    } else {
+      typeHuman()
+      runAgents()
+    }
+  }
+</script>

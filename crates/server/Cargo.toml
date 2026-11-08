@@ -1,0 +1,22 @@
+[package]
+name = "blackhole-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+axum = "0.8"
+blackhole-core = { version = "0.1.0", path = "../core" }
+blackhole-mcp = { version = "0.1.0", path = "../mcp" }
+blackhole-s3 = { version = "0.1.0", path = "../s3" }
+bytes = "1.12.1"
+clap = { version = "4.6.7", features = ["derive", "env"] }
+futures = "0.3.34"
+http = "1.5.0"
+rmcp = { version = "3.8.0", features = ["server", "macros", "transport-streamable-http-server"] }
+s3s = "0.17"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "signal", "sync", "time"] }

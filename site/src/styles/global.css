@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist-mono";
+
+@theme {
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, monospace;
+  --color-ink: #14111c;
+  --color-well: #1c1826;
+  --color-edge: #2e2839;
+  --color-paper: #fff7ec;
+  --color-muted: #b9b3c7;
+  --color-dim: #857e94;
+  --color-accent: #ff5a1f;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.hero-icon {
+  display: inline-flex;
+  width: 1.1em;
+  height: 1.1em;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-edge);
+  border-radius: 0.3em;
+  background: var(--color-well);
+}
+
+.hero-icon svg {
+  width: 0.65em;
+  height: 0.65em;
+}
+
+.icon-undo {
+  animation: undo 3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.icon-break {
+  animation: break 3s ease-in-out infinite;
+}
+
+.icon-moon {
+  animation: moon 4s ease-in-out infinite alternate;
+}
+
+@keyframes moon {
+  from {
+    transform: rotate(-18deg);
+    opacity: 0.75;
+  }
+  to {
+    transform: rotate(12deg);
+    opacity: 1;
+  }
+}
+
+@keyframes undo {
+  0%, 45% {
+    transform: rotate(0deg);
+  }
+  75%, 100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes break {
+  0%, 58%, 100% {
+    transform: none;
+    opacity: 1;
+  }
+  62% {
+    transform: translateX(-2px) rotate(-12deg);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translateX(2px) rotate(12deg);
+    opacity: 1;
+  }
+  70% {
+    transform: translateX(-2px) rotate(-8deg);
+    opacity: 0.5;
+  }
+  74% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-undo,
+  .icon-break,
+  .icon-moon {
+    animation: none;
+  }
+}
